@@ -859,6 +859,12 @@ class MusicBot(discord.Client):
                 "You have reached your enqueued song limit (%s)" % permissions.max_songs, expire_in=30
             )
 
+        # Small NSFW check.
+        if not self.config.nsfw_mode:
+            for word in self.config.nsfw_words:
+                if word in song_url.lower():
+                    raise exceptions.CommandError("That video cannot be played. NSFW is disabled.", expire_in=30)
+
         await self.send_typing(channel)
 
         if leftover_args:
@@ -1014,6 +1020,12 @@ class MusicBot(discord.Client):
                     print("[Info] Using \"%s\" instead" % e.use_url)
 
                 return await self.cmd_play(player, channel, author, permissions, leftover_args, e.use_url)
+
+            # Small NSFW check.
+            if not self.config.nsfw_mode:
+                for word in self.config.nsfw_words:
+                    if word in entry.title.lower():
+                        raise exceptions.CommandError("That video cannot be played. NSFW is disabled.", expire_in=30)
 
             reply_text = "Enqueued **%s** to be played. Position in queue: %s"
             btext = entry.title
